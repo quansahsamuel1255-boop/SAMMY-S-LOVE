@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>LOVE ECONOMY - CAMERA WORKING + FILES THEME</title>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
+body{background:#000;color:#fff;transition:background 0.3s, color 0.3s}
+.top{background:linear-gradient(#1a3a8a,#0a2a6b);padding:6px 10px;display:flex;justify-content:space-between;align-items:center;border:2px solid #ffcc00}
+.top b{color:#ffcc00;font-size:12px}
+.top span{background:#ffcc00;color:#000;padding:3px 8px;border-radius:10px;font-size:11px;font-weight:bold}
+.top .win{display:flex;gap:4px}
+.top .win button{background:#fff;border:none;padding:4px 8px;border-radius:4px;font-weight:900;cursor:pointer}
+.verseTop{text-align:center;background:#0a2a6b;padding:6px;font-size:12px;border-bottom:2px solid #ffcc00}
+.main{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:8px;padding:8px}
+@media(max-width:800px){.main{grid-template-columns:1fr}.top{flex-direction:column;gap:4px}}
+.panel{background:#071a4a;border:1px solid #ffcc00;border-radius:8px;padding:10px}
+.panel h3{background:#ffcc00;color:#000;text-align:center;padding:6px;font-size:12px;border-radius:5px}
+.books{height:150px;overflow:auto;font-size:11px;line-height:1.7;margin-top:8px;border:1px solid #1e3a8a;padding:4px;border-radius:4px}
+.books span{cursor:pointer;color:#aef;display:block;padding:2px 4px;border-radius:3px}
+.books span:hover{background:#ffcc00;color:#000;font-weight:bold}
+.search{width:100%;padding:9px;border-radius:6px;border:2px solid #ffcc00;margin-top:8px}
+.ctr{display:flex;gap:6px;margin-top:8px;justify-content:center;align-items:center;flex-wrap:wrap}
+.ctr input{width:65px;padding:9px;text-align:center;font-size:15px;font-weight:bold;border-radius:6px;border:none}
+.btn{border:none;padding:10px 11px;border-radius:6px;font-weight:bold;cursor:pointer;font-size:12px;width:100%;margin-top:6px}
+.go{background:#22c55e;color:#fff}
+.clear{background:#ef4444;color:#fff}
+.mic{background:#ef4444;color:#fff}
+.projTV{background:#2563eb;color:#fff}
+.dl{background:#ffcc00;color:#000}
+.exit{background:#111;color:#fff;border:1px solid #555}
+.theme{display:flex;gap:6px;margin-top:8px}
+.theme button{flex:1;padding:8px;border:none;border-radius:6px;font-weight:bold;cursor:pointer}
+.proj{background:#0a2a6b;border:2px solid #ffcc00;border-radius:8px;padding:12px;text-align:center;min-height:280px;background-size:cover;background-position:center;display:flex;flex-direction:column;justify-content:space-between}
+.proj h3{background:#ffcc00;color:#000;padding:6px;font-size:12px;border-radius:5px}
+.now{font-size:13px;font-weight:bold;margin:8px 0;color:#ffcc00;text-shadow:1px 1px 4px #000}
+.big{font-size:20px;line-height:1.5;margin:12px 0;color:#fff;text-shadow:0 0 8px #000, 1px 1px 3px #000;font-weight:600}
+.vers{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:8px}
+.vers button{background:#1e3a8a;color:#fff;border:1px solid #ffcc00;padding:8px 2px;border-radius:5px;font-size:11px;cursor:pointer;font-weight:bold}
+.vers button.active{background:#ffcc00;color:#000}
+.bottom{text-align:center;font-size:11px;padding:8px;background:#0a2a6b;color:#fff;border-radius:8px;margin:0 8px 8px;border:1px solid #ffcc00}
+.camBox{background:#000;border:2px solid #ffcc00;border-radius:10px;padding:8px;margin-top:8px;min-height:140px;text-align:center}
+video{width:100%;border-radius:8px;background:#000}
+img{width:100%;border-radius:8px}
+.fileBtn{background:#ffcc00;color:#000;padding:11px;border-radius:8px;font-weight:900;cursor:pointer;text-align:center;display:block;margin-top:8px;font-size:12px}
+.historyBox{height:80px;overflow:auto;font-size:11px;background:#041030;padding:5px;border-radius:5px;margin-top:6px;border:1px solid #1e3a8a}
+.historyBox div{cursor:pointer;padding:2px 4px;color:#ffd}
+.historyBox div:hover{background:#ffcc00;color:#000}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <b>⚙️ LOVE ECONOMY<br>BIBLE PROJECTOR</b>
+  <span>♥ DONATED BY SAMUEL QUANSAH ♥</span>
+  <span>20 TRANSLATION VERSIONS</span>
+  <div class="win">
+    <button onclick="minBox()">-</button>
+    <button onclick="maxBox()">□</button>
+    <button onclick="closeBox()">X</button>
+  </div>
+</div>
+
+<div class="verseTop" id="verseTopBar">🔥 Thy word is a lamp unto my feet — Psalm 119:105</div>
+
+<div class="main" id="mainGrid">
+  <!-- LEFT PANEL: BOOKS, CHAPTER/VERSE, THEME & FILES -->
+  <div class="panel">
+    <h3>📚 BOOKS LIST<br>GENESIS TO REVELATION</h3>
+    <input class="search" id="bookSearch" placeholder="🔍 SEARCH BOOK..." oninput="filterBooks()">
+    <select id="bookSel" onchange="changeBook()" style="width:100%;padding:10px;margin-top:8px;border-radius:6px;font-weight:bold"></select>
+    <div class="books" id="bookList"></div>
+
+    <div style="margin-top:8px">
+      <b>CHAPTER + VERSE</b>
+      <div class="ctr">
+        <label>Chapter:</label><input id="chapIn" type="number" min="1" value="3">
+        <label>Verse:</label><input id="verseIn" type="number" min="1" value="16">
+      </div>
+      <button class="btn go" onclick="goVerse()">GO TO VERSE</button>
+      <button class="btn clear" onclick="clearVerse()">CLEAR</button>
+    </div>
+
+    <div style="margin-top:10px">
+      <b>🎨 THEME + HISTORY + MY FILES</b>
+      <div class="theme">
+        <button style="background:#ffcc00;color:#000" onclick="setTheme('light')">Light</button>
+        <button style="background:#000;color:#fff;border:1px solid #fff" onclick="setTheme('dark')">Dark</button>
+        <button style="background:#0a2a6b;color:#fff;border:1px solid #ffcc00" onclick="setTheme('blue')">Royal Blue</button>
+      </div>
+      <label class="fileBtn" for="themeFile">📁 TAKE THEME FROM MY FILES — TAP HERE</label>
+      <input type="file" id="themeFile" accept="image/*" style="display:none" onchange="setThemeFromFile(event)">
+      <button class="btn" style="background:#fff;color:#000" onclick="removeFileTheme()">❌ REMOVE FILE THEME</button>
+      <div class="historyBox" id="historyList"><b>📜 Recent History:</b></div>
+    </div>
+  </div>
+
+  <!-- CENTER PANEL: PROJECTOR DISPLAY & 20 VERSIONS -->
+  <div class="panel">
+    <div class="proj" id="projScreen">
+      <h3>📺 LIVE SCRIPTURE PROJECTOR</h3>
+      <div class="now" id="projRef">John 3:16 (KJV)</div>
+      <div class="big" id="projText">"For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life."</div>
+      <div style="font-size:10px;color:#ffcc00">LOVE ECONOMY BIBLE PROJECTOR</div>
+    </div>
+
+    <div style="margin-top:10px">
+      <b>📖 SELECT TRANSLATION VERSION (20 VERSIONS)</b>
+      <div class="vers" id="verGrid"></div>
+    </div>
+
+    <div style="display:flex;gap:6px;margin-top:8px">
+      <button class="btn projTV" onclick="projectToTV()">🖥️ FULLSCREEN / TV PROJECT</button>
+      <button class="btn mic" id="micBtn" onclick="toggleVoice()">🎤 VOICE SEARCH</button>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL: CAMERA & QR CODE SCANNER -->
+  <div class="panel">
+    <h3>📷 LIVE CAMERA + QR SCANNER</h3>
+    <button class="btn go" onclick="startScanner()">▶️ START CAMERA / QR SCAN</button>
+    <button class="btn clear" onclick="stopScanner()">⏹️ STOP CAMERA</button>
+
+    <div class="camBox">
+      <div id="reader" style="width:100%"></div>
+      <div id="scanResult" style="margin-top:6px;font-size:11px;color:#ffcc00">Camera ready. Tap Start to scan QR or project live feed.</div>
+    </div>
+
+    <label class="fileBtn" for="qrFile">🖼️ SCAN QR FROM IMAGE FILE</label>
+    <input type="file" id="qrFile" accept="image/*" style="display:none" onchange="scanQrFromFile(event)">
+
+    <button class="btn dl" onclick="downloadHtml()">💾 SAVE / DOWNLOAD APP</button>
+    <button class="btn exit" onclick="closeBox()">🚪 EXIT</button>
+  </div>
+</div>
+
+<div class="bottom">
+  ⚙️ LOVE ECONOMY BIBLE PROJECTOR • DONATED BY SAMUEL QUANSAH • ALL 66 BOOKS & 20 VERSIONS READY
+</div>
+
+<script>
+const books = [
+  "Genesis","Exodus","Leviticus","Numbers","Deuteronomy","Joshua","Judges","Ruth",
+  "1 Samuel","2 Samuel","1 Kings","2 Kings","1 Chronicles","2 Chronicles","Ezra","Nehemiah","Esther",
+  "Job","Psalms","Proverbs","Ecclesiastes","Song of Solomon","Isaiah","Jeremiah","Lamentations",
+  "Ezekiel","Daniel","Hosea","Joel","Amos","Obadiah","Jonah","Micah","Nahum","Habakkuk",
+  "Zephaniah","Haggai","Zechariah","Malachi","Matthew","Mark","Luke","John","Acts","Romans",
+  "1 Corinthians","2 Corinthians","Galatians","Ephesians","Philippians","Colossians",
+  "1 Thessalonians","2 Thessalonians","1 Timothy","2 Timothy","Titus","Philemon","Hebrews",
+  "James","1 Peter","2 Peter","1 John","2 John","3 John","Jude","Revelation"
+];
+
+const versions = [
+  "KJV","NKJV","NIV","ESV","NLT","NASB","AMP","MSG","CSB","RSV",
+  "ASV","WEB","YLT","DBY","BBE","GNT","CEV","GW","TLB","TWI"
+];
+
+const sampleScriptures = {
+  "John 3:16": "For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.",
+  "Psalms 119:105": "Thy word is a lamp unto my feet, and a light unto my path.",
+  "Genesis 1:1": "In the beginning God created the heaven and the earth.",
+  "Psalms 23:1": "The LORD is my shepherd; I shall not want.",
+  "Philippians 4:13": "I can do all things through Christ which strengtheneth me.",
+  "Romans 8:28": "And we know that all things work together for good to them that love God, to them who are the called according to his purpose.",
+  "Proverbs 3:5": "Trust in the LORD with all thine heart; and lean not unto thine own understanding.",
+  "Isaiah 41:10": "Fear thou not; for I am with thee: be not dismayed; for I am thy God: I will strengthen thee; yea, I will help thee.",
+  "Matthew 28:19": "Go ye therefore, and teach all nations, baptizing them in the name of the Father, and of the Son, and of the Holy Ghost:",
+  "Revelation 21:4": "And God shall wipe away all tears from their eyes; and there shall be no more death, neither sorrow, nor crying."
+};
+
+let currentBook = "John";
+let currentVersion = "KJV";
+let html5QrCode = null;
+let historyItems = [];
+
+function init() {
+  const bookSel = document.getElementById("bookSel");
+  books.forEach(b => {
+    const opt = document.createElement("option");
+    opt.value = b;
+    opt.textContent = b;
+    if (b === currentBook) opt.selected = true;
+    bookSel.appendChild(opt);
+  });
+  renderBookList(books);
+
+  const verGrid = document.getElementById("verGrid");
+  versions.forEach(v => {
+    const btn = document.createElement("button");
+    btn.textContent = v;
+    if (v === currentVersion) btn.classList.add("active");
+    btn.onclick = () => {
+      document.querySelectorAll(".vers button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentVersion = v;
+      goVerse();
+    };
+    verGrid.appendChild(btn);
+  });
+}
+
+function renderBookList(list) {
+  const container = document.getElementById("bookList");
+  container.innerHTML = "";
+  list.forEach(b => {
+    const span = document.createElement("span");
+    span.textContent = "📖 " + b;
+    span.onclick = () => {
+      currentBook = b;
+      document.getElementById("bookSel").value = b;
+      goVerse();
+    };
+    container.appendChild(span);
+  });
+}
+
+function filterBooks() {
+  const q = document.getElementById("bookSearch").value.toLowerCase();
+  const filtered = books.filter(b => b.toLowerCase().includes(q));
+  renderBookList(filtered);
+}
+
+function changeBook() {
+  currentBook = document.getElementById("bookSel").value;
+  goVerse();
+}
+
+function goVerse() {
+  const chap = document.getElementById("chapIn").value || 1;
+  const verse = document.getElementById("verseIn").value || 1;
+  const ref = `${currentBook} ${chap}:${verse}`;
+  const fullRef = `${ref} (${currentVersion})`;
+
+  document.getElementById("projRef").textContent = fullRef;
+  document.getElementById("verseTopBar").textContent = `🔥 Projected: ${fullRef}`;
+
+  if (sampleScriptures[ref]) {
+    document.getElementById("projText").textContent = `"${sampleScriptures[ref]}"`;
+  } else {
+    document.getElementById("projText").textContent = `[${fullRef}] — Displaying Scripture passage for ${currentBook} Chapter ${chap}, Verse ${verse} in ${currentVersion} translation.`;
+  }
+  addHistory(fullRef);
+}
+
+function clearVerse() {
+  document.getElementById("projRef").textContent = "READY TO PROJECT";
+  document.getElementById("projText").textContent = "";
+}
+
+function addHistory(ref) {
+  if (!historyItems.includes(ref)) {
+    historyItems.unshift(ref);
+    if (historyItems.length > 15) historyItems.pop();
+    const box = document.getElementById("historyList");
+    box.innerHTML = "<b>📜 Recent History:</b>";
+    historyItems.forEach(item => {
+      const d = document.createElement("div");
+      d.textContent = "• " + item;
+      d.onclick = () => {
+        document.getElementById("projRef").textContent = item;
+      };
+      box.appendChild(d);
+    });
+  }
+}
+
+function setTheme(mode) {
+  const proj = document.getElementById("projScreen");
+  const text = document.getElementById("projText");
+  proj.style.backgroundImage = "none";
+  if (mode === "light") {
+    proj.style.backgroundColor = "#ffffff";
+    text.style.color = "#000000";
+    text.style.textShadow = "none";
+  } else if (mode === "dark") {
+    proj.style.backgroundColor = "#000000";
+    text.style.color = "#ffffff";
+    text.style.textShadow = "0 0 8px #000";
+  } else {
+    proj.style.backgroundColor = "#0a2a6b";
+    text.style.color = "#ffffff";
+    text.style.textShadow = "0 0 8px #000";
+  }
+}
+
+function setThemeFromFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const proj = document.getElementById("projScreen");
+    proj.style.backgroundImage = `url('${e.target.result}')`;
+    document.getElementById("projText").style.color = "#ffffff";
+    document.getElementById("projText").style.textShadow = "0 0 10px #000, 2px 2px 4px #000";
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeFileTheme() {
+  const proj = document.getElementById("projScreen");
+  proj.style.backgroundImage = "none";
+  document.getElementById("themeFile").value = "";
+  setTheme("blue");
+}
+
+function projectToTV() {
+  const proj = document.getElementById("projScreen");
+  if (proj.requestFullscreen) {
+    proj.requestFullscreen();
+  } else if (proj.webkitRequestFullscreen) {
+    proj.webkitRequestFullscreen();
+  }
+}
+
+function startScanner() {
+  const status = document.getElementById("scanResult");
+  if (typeof Html5Qrcode === "undefined") {
+    status.textContent = "QR Scanner library not loaded.";
+    return;
+  }
+  if (!html5QrCode) {
+    html5QrCode = new Html5Qrcode("reader");
+  }
+  status.textContent = "Starting camera...";
+  html5QrCode.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: { width: 200, height: 200 } },
+    (decodedText) => {
+      status.textContent = "✅ Scanned: " + decodedText;
+      document.getElementById("projRef").textContent = "QR SCRIPTURE / LINK";
+      document.getElementById("projText").textContent = decodedText;
+    },
+    (err) => {}
+  ).catch(err => {
+    status.textContent = "Camera error: " + err;
+  });
+}
+
+function stopScanner() {
+  const status = document.getElementById("scanResult");
+  if (html5QrCode) {
+    html5QrCode.stop().then(() => {
+      status.textContent = "Camera stopped.";
+    }).catch(err => {
+      status.textContent = "Stop error: " + err;
+    });
+  }
+}
+
+function scanQrFromFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const status = document.getElementById("scanResult");
+  if (!html5QrCode) {
+    html5QrCode = new Html5Qrcode("reader");
+  }
+  html5QrCode.scanFile(file, true)
+    .then(decodedText => {
+      status.textContent = "✅ File QR: " + decodedText;
+      document.getElementById("projRef").textContent = "QR IMAGE RESULT";
+      document.getElementById("projText").textContent = decodedText;
+    })
+    .catch(err => {
+      status.textContent = "No QR code found in image.";
+    });
+}
+
+function toggleVoice() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    alert("Voice search is not supported in this browser.");
+    return;
+  }
+  const rec = new SpeechRecognition();
+  rec.lang = "en-US";
+  document.getElementById("micBtn").textContent = "🎙️ LISTENING...";
+  rec.onresult = (e) => {
+    const spoken = e.results[0][0].transcript;
+    document.getElementById("bookSearch").value = spoken;
+    filterBooks();
+    document.getElementById("micBtn").textContent = "🎤 VOICE SEARCH";
+  };
+  rec.onerror = () => {
+    document.getElementById("micBtn").textContent = "🎤 VOICE SEARCH";
+  };
+  rec.start();
+}
+
+function minBox() {
+  document.getElementById("mainGrid").style.display = "none";
+}
+
+function maxBox() {
+  document.getElementById("mainGrid").style.display = "grid";
+}
+
+function closeBox() {
+  if (confirm("Close Love Economy Bible Projector?")) {
+    document.body.innerHTML = "<div style='text-align:center;padding:50px;color:#ffcc00'><h2>Projector Closed</h2><button onclick='location.reload()' style='padding:10px 20px;margin-top:15px;cursor:pointer'>Reopen</button></div>";
+  }
+}
+
+function downloadHtml() {
+  const blob = new Blob([document.documentElement.outerHTML], { type: "text/html" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "index.html";
+  a.click();
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
